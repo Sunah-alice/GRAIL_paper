@@ -194,31 +194,14 @@
     </p>
   </section>
 
-  <section id="hybrid">
-    <h2>Task-adaptive hybrid framework</h2>
+  <section id="completion">
+    <h2>Task 1 — Evidence Set Completion</h2>
     <p>
-      Different question types favor different strategies: localized aggregation (Uni-modal,
-      Intersect) benefits from <i>additive</i> reinforcement, while compositional, cross-modal
-      reasoning (Compose, Compare) demands <i>subtractive</i> steering. A lightweight,
-      self-supervised selector routes each query to the right specialist before search.
-    </p>
-    <figure>
-      <img src="figure/hybrid.png" alt="Hybrid framework leveraging complementary specialists">
-      <figcaption>
-        <b>Best of both worlds.</b> By routing each query to the optimal specialist, the
-        hybrid framework achieves a +35.7% macro-averaged gain over the additive baseline on
-        the MultimodalQA test split.
-      </figcaption>
-    </figure>
-  </section>
-
-  <section id="results">
-    <h2>Results</h2>
-    <p>
-      Macro-averaged recall on the MultimodalQA validation split
-      ($q\text{-type} \in \{\text{Compare, Compose, Intersect}\}$). GRAIL and the hybrid beat
-      both the additive baseline and explicit LLM query regeneration — at a fraction of the
-      latency.
+      Given a question and a partial gold evidence set, retrieve the single <i>missing</i>
+      piece from the full corpus. We report macro-averaged recall on the MultimodalQA
+      validation split ($q\text{-type} \in \{\text{Compare, Compose, Intersect}\}$). GRAIL and
+      the task-adaptive hybrid beat both the additive baseline and explicit LLM query
+      regeneration — at a fraction of the latency.
     </p>
     <div class="tablewrap">
       <table>
@@ -239,9 +222,43 @@
       </table>
     </div>
     <p>
-      Sequential GRAIL also expands the effective search horizon: under iterative pool
-      construction it surfaces complementary evidence originally ranked around the 30th–35th
-      position into the top-$K$, and stays robust even when the initial pool is entirely noise.
+      Additive and subtractive steering are complementary: additive helps localized
+      aggregation (Uni-modal, Intersect), while subtractive is essential for compositional,
+      cross-modal reasoning (Compose, Compare). A lightweight self-supervised selector routes
+      each query to the right specialist, giving a <b>+35.7% macro-averaged</b> gain over the
+      additive baseline.
+    </p>
+    <figure>
+      <img src="figure/hybrid.png" alt="Hybrid framework leveraging complementary specialists">
+      <figcaption>
+        <b>Best of both worlds.</b> Routing each query to its optimal specialist yields a
+        best-of-both-worlds result on the MultimodalQA test split.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section id="sequential">
+    <h2>Task 2 — Sequential Pool Construction</h2>
+    <p>
+      In the open-domain setting there is no partial gold context: the retriever must build
+      the top-$K$ pool from scratch, over several iterative slices. The additive loop degrades
+      rapidly as slices accumulate (error propagation / semantic anchoring), while GRAIL stays
+      stable or improves — turning a fixed budget $K$ into a much deeper effective search.
+    </p>
+    <figure>
+      <img src="figure/app_pool_comp.png" alt="Set-Recall vs. number of retrieval slices for K=10 and K=20">
+      <figcaption>
+        <b>Robust under iterative slicing.</b> Set-Recall vs. number of retrieval slices for
+        $K=10$ (left) and $K=20$ (right). Additive retrieval collapses as slices increase
+        (−7.11%p / −11.71%p), whereas gap-aware GRAIL stays above the single-shot baseline
+        (+1.76%p / +1.69%p).
+      </figcaption>
+    </figure>
+    <p>
+      Diagnostically, sequential GRAIL surfaces complementary evidence originally ranked
+      around the 30th–35th position into the top-$K$ (high Rank Jump), and keeps a positive
+      Noise-Resilience Margin even when the initial pool contains zero gold items — it
+      self-corrects rather than propagating early mistakes.
     </p>
   </section>
 
