@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRAIL: Gap-Aware Retrieval for Multimodal Multi-Hop QA</title>
+<meta name="description" content="GRAIL performs implicit, context-subtractive query steering in a shared multimodal embedding space for multimodal multi-hop QA retrieval. EMNLP 2026.">
+
+<!-- MathJax for equations -->
+<script>
+  window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root {
+    --fg: #1a1a1a;
+    --muted: #666;
+    --accent: #b31b1b;
+    --accent-soft: #f6e9e9;
+    --border: #e6e6e6;
+    --bg-soft: #fafafa;
+    --maxw: 820px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--fg);
+    line-height: 1.65;
+    background: #fff;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
+
+  /* Header */
+  header { text-align: center; padding: 56px 20px 28px; border-bottom: 1px solid var(--border); }
+  h1 { font-size: 1.9rem; line-height: 1.3; margin: 0 0 6px; font-weight: 700; }
+  h1 .sub { color: var(--accent); }
+  .venue {
+    display: inline-block; margin: 10px 0 18px; padding: 3px 12px;
+    background: var(--accent-soft); color: var(--accent); border-radius: 999px;
+    font-size: .85rem; font-weight: 600; letter-spacing: .02em;
+  }
+  .authors { font-size: 1.05rem; margin: 6px 0; }
+  .authors a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--border); }
+  .affil { color: var(--muted); font-size: .95rem; margin-bottom: 20px; }
+  .affil .corr { font-size: .8rem; }
+
+  /* Buttons */
+  .btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px; border-radius: 999px;
+    background: #1a1a1a; color: #fff; text-decoration: none;
+    font-size: .92rem; font-weight: 600; transition: transform .08s ease, background .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); background: #000; }
+  .btn.alt { background: var(--accent); }
+  .btn.alt:hover { background: #8f1414; }
+
+  /* Sections */
+  section { padding: 40px 0 8px; }
+  h2 {
+    font-size: 1.35rem; margin: 0 0 16px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent-soft);
+  }
+  p { margin: 0 0 16px; }
+  .lead { font-size: 1.05rem; }
+
+  /* TL;DR box */
+  .tldr {
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-left: 4px solid var(--accent); border-radius: 8px;
+    padding: 18px 22px; margin: 26px 0 8px; font-size: 1rem;
+  }
+  .tldr b { color: var(--accent); }
+
+  /* Figures */
+  figure { margin: 26px 0; text-align: center; }
+  figure img {
+    max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px;
+  }
+  figcaption { color: var(--muted); font-size: .88rem; margin-top: 10px; text-align: left; }
+
+  /* Equation callout */
+  .eq { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px;
+        padding: 6px 16px; margin: 18px 0; overflow-x: auto; }
+
+  /* Table */
+  .tablewrap { overflow-x: auto; margin: 20px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { padding: 8px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  th { background: var(--bg-soft); font-weight: 600; }
+  td:first-child, th:first-child { text-align: left; }
+  tr.best { background: var(--accent-soft); }
+  tr.best td { font-weight: 700; }
+  .group-row td { background: #fff; color: var(--muted); font-style: italic; font-size: .85rem;
+                  text-align: left; border-bottom: none; padding-top: 14px; }
+
+  /* BibTeX */
+  pre {
+    background: #1a1a1a; color: #e6e6e6; padding: 18px; border-radius: 8px;
+    overflow-x: auto; font-size: .85rem; line-height: 1.5;
+  }
+
+  footer { text-align: center; color: var(--muted); font-size: .85rem;
+           padding: 40px 20px 60px; border-top: 1px solid var(--border); margin-top: 40px; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.5rem; }
+    header { padding-top: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Subtraction Gets You More:<br><span class="sub">Gap-Aware Retrieval for Multimodal Multi-Hop QA</span></h1>
+    <div class="venue">EMNLP 2026</div>
+    <div class="authors">
+      <a href="#">Sunah O</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="#">Jay-Yoon Lee</a><span class="corr">&nbsp;*</span>
+    </div>
+    <div class="affil">Seoul National University &nbsp;·&nbsp; <span class="corr">* Corresponding author</span></div>
+    <div class="btns">
+      <a class="btn alt" href="https://arxiv.org/abs/2605.28641" target="_blank" rel="noopener">arXiv</a>
+      <a class="btn" href="https://arxiv.org/pdf/2605.28641" target="_blank" rel="noopener">PDF</a>
+      <a class="btn" href="https://github.com/Sunah-alice/GRAIL" target="_blank" rel="noopener">Code</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="tldr">
+    <b>TL;DR</b> &nbsp; GRAIL rewrites retrieval queries <i>inside</i> the embedding space by
+    <b>subtracting</b> already-covered context, steering the search toward the missing
+    evidence. This escapes the "semantic anchoring" trap of additive and LLM-rewriting
+    retrievers, and — combined with a task-adaptive hybrid router — yields a
+    <b>+35.7% macro-averaged</b> gain on MultimodalQA evidence set completion.
+  </div>
+
+  <figure>
+    <img src="figure/intro.png" alt="Semantic anchoring redundancy trap in MMQA retrieval">
+    <figcaption>
+      <b>The redundancy trap in MMQA.</b> Given a table and three emblems, the goal is to
+      fetch the missing visual evidence (Bolton Wanderers' emblem). <i>Query + Context</i>
+      stays trapped by the existing Lancashire Senior Cup context (semantic anchoring), and
+      explicit LLM rewriting (IRCoT) prematurely concludes on Manchester City. In contrast,
+      <i>Query − Context</i> (GRAIL) implicitly subtracts the covered features and shifts the
+      search toward the unobserved visual target.
+    </figcaption>
+  </figure>
+
+  <section id="intro">
+    <h2>The problem: Semantic Anchoring</h2>
+    <p class="lead">
+      Multimodal multi-hop QA needs evidence spread across text, tables, and images — and the
+      retriever sets the performance ceiling of the whole pipeline.
+    </p>
+    <p>
+      To gather multi-hop evidence, modern retrievers iteratively regenerate the query by
+      <b>adding</b> the already-retrieved context. But this additive loop has a structural
+      failure we call <b>Semantic Anchoring</b>: the strong semantic gravity of fetched
+      evidence traps the retriever on prominent entities, fetching redundant assets while
+      pushing the true target out of the top-$K$. Explicit LLM query rewriting fares no
+      better — flattening dense visual features into text tokens triggers semantic drift and
+      heavy latency.
+    </p>
+  </section>
+
+  <section id="method">
+    <h2>GRAIL: implicit context-subtractive steering</h2>
+    <p>
+      GRAIL operates entirely in a unified multimodal embedding space. Given a query $q$ and
+      a partial evidence set $\mathcal{E}_p$, it aggregates the covered knowledge into a
+      context vector $h_\text{ctx}$ via query-weighted attention, then removes the overlapping
+      component from the query with a learnable gap gate $g$:
+    </p>
+    <div class="eq">
+      $$ q_\text{gap} \;=\; q \;-\; g \cdot \left( \frac{q \cdot h_\text{ctx}}{\lVert h_\text{ctx}\rVert^2} \right) h_\text{ctx}, \qquad g = \sigma\!\left(W_\text{gap}[q; h_\text{ctx}]\right) $$
+    </div>
+    <p>
+      The refined query $q_\text{gap}$ points toward the <i>unanswered</i> facets of the
+      question. Operating in latent space avoids any linguistic loss, and because every step
+      is differentiable the retrieval signal trains the steering end-to-end. Applied
+      iteratively, it discovers new evidence without accumulating semantic bias.
+    </p>
+    <p>
+      A two-stage design makes this possible: (1) <b>Unified Semantic Alignment</b>
+      synchronizes text/table/image topologies so cross-modal redundancy can be measured, and
+      (2) the <b>Gap-aware Search Mechanism</b> performs the subtraction above.
+    </p>
+  </section>
+
+  <section id="hybrid">
+    <h2>Task-adaptive hybrid framework</h2>
+    <p>
+      Different question types favor different strategies: localized aggregation (Uni-modal,
+      Intersect) benefits from <i>additive</i> reinforcement, while compositional, cross-modal
+      reasoning (Compose, Compare) demands <i>subtractive</i> steering. A lightweight,
+      self-supervised selector routes each query to the right specialist before search.
+    </p>
+    <figure>
+      <img src="figure/hybrid.png" alt="Hybrid framework leveraging complementary specialists">
+      <figcaption>
+        <b>Best of both worlds.</b> By routing each query to the optimal specialist, the
+        hybrid framework achieves a +35.7% macro-averaged gain over the additive baseline on
+        the MultimodalQA test split.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section id="results">
+    <h2>Results</h2>
+    <p>
+      Macro-averaged recall on the MultimodalQA validation split
+      ($q\text{-type} \in \{\text{Compare, Compose, Intersect}\}$). GRAIL and the hybrid beat
+      both the additive baseline and explicit LLM query regeneration — at a fraction of the
+      latency.
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Method</th><th>R@1</th><th>R@5</th><th>R@10</th><th>R@20</th><th>Latency</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Query Only</td><td>16.24</td><td>32.68</td><td>40.51</td><td>48.54</td><td>2–5 ms</td></tr>
+          <tr class="group-row"><td colspan="6">Explicit query generation (LLM)</td></tr>
+          <tr><td>Closed-Book</td><td>13.78</td><td>26.89</td><td>34.65</td><td>42.69</td><td>0.6–1.0 s</td></tr>
+          <tr><td>IRCoT</td><td>13.42</td><td>24.87</td><td>30.18</td><td>36.21</td><td>1.1–1.6 s</td></tr>
+          <tr><td>Answer-Augmented</td><td>16.54</td><td>33.24</td><td>39.96</td><td>48.86</td><td>1.2–1.8 s</td></tr>
+          <tr class="group-row"><td colspan="6">Implicit vector steering</td></tr>
+          <tr><td>Additive</td><td>11.57</td><td>25.89</td><td>32.11</td><td>39.82</td><td>2–5 ms</td></tr>
+          <tr><td>GRAIL</td><td>17.55</td><td>33.61</td><td>40.81</td><td>47.50</td><td>3–6 ms</td></tr>
+          <tr class="best"><td>Hybrid (ours)</td><td>22.21</td><td>39.94</td><td>46.90</td><td>53.80</td><td>3–6 ms</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Sequential GRAIL also expands the effective search horizon: under iterative pool
+      construction it surfaces complementary evidence originally ranked around the 30th–35th
+      position into the top-$K$, and stays robust even when the initial pool is entirely noise.
+    </p>
+  </section>
+
+  <section id="bibtex">
+    <h2>BibTeX</h2>
+    <pre>@article{o2026grail,
+  title   = {Subtraction Gets You More: Gap-Aware Retrieval for Multimodal Multi-Hop QA},
+  author  = {O, Sunah and Lee, Jay-Yoon},
+  journal = {arXiv preprint arXiv:2605.28641},
+  year    = {2026}
+}</pre>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    Sunah O, Jay-Yoon Lee · Seoul National University ·
+    <a href="https://github.com/Sunah-alice/GRAIL">Code</a> ·
+    <a href="https://arxiv.org/abs/2605.28641">arXiv</a>
+    <br>Contact: ec_osa16586@snu.ac.kr
+  </div>
+</footer>
+
+</body>
+</html>
